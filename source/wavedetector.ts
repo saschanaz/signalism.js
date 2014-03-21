@@ -10,56 +10,53 @@ interface IntermediateWave {
 
 class WaveDetector {
     ondetect: (wave: Wave) => any;
-    private buffer: number[] = [];
-    private lastIntermediateWave: IntermediateWave;
+    private signalBuffer: number[] = [];
+    private waveBuffer: IntermediateWave[] = [];
+    private get lastBufferedWave() {
+        return this.waveBuffer[this.waveBuffer.length - 1];
+    }
 
     private lastThree(index: number) {
-        return this.buffer[this.buffer.length - 3 + index];
+        return this.signalBuffer[this.signalBuffer.length - 3 + index];
     }
 
     private exportIntermediateWave(): IntermediateWave {
-        var signals = this.buffer.splice(0, this.buffer.length - 1);
+        var signals = this.signalBuffer.splice(0, this.signalBuffer.length - 1);
         return {
             firstBottom: Math.min.apply(null, signals),
             peak: signals[signals.length - 1]
         };
     }
 
+    private saveWave(wave: IntermediateWave) {
+        if (wave.firstBottom > 0) {
+            if (this.lastBufferedWave.peak < wave.peak) {
+                this.lastBufferedWave.peak = wave.peak;
+            }
+        }
+        else
+            this.waveBuffer.push(wave);
+    }
+
     readSignal(signal: number) {
-        this.buffer.push(signal);
-        if (this.buffer.length < 3) {
+        this.signalBuffer.push(signal);
+        if (this.signalBuffer.length < 3) {
             return;
         }
 
         if (this.lastThree(0) <= this.lastThree(1)
             && this.lastThree(1) > this.lastThree(2)
             && this.lastThree(1) > 0) {
-            var newIntermediateWave = this.exportIntermediateWave();
-            if (this.ondetect && this.lastIntermediateWave) {
+            this.saveWave(this.exportIntermediateWave());
+
+            if (this.ondetect && this.waveBuffer.length > 3) {
+                var wave = this.waveBuffer.shift();
                 window.setImmediate(this.ondetect, {
-                    firstBottom: this.lastIntermediateWave.firstBottom,
-                    peak: this.lastIntermediateWave.peak,
-                    secondBottom: newIntermediateWave.firstBottom
+                    firstBottom: wave.firstBottom,
+                    peak: wave.peak,
+                    secondBottom: this.waveBuffer[0].firstBottom
                 });
             }
-            this.lastIntermediateWave = newIntermediateWave;
         }
-		//var currentPointValues = [];
-        //for (var i = 0; i < 3 && coordinate[0] <= matrix.size[0]; i++) {
-        //    currentPointValues.push(matrix.getFor(coordinate));
-        //    coordinate[0]++;
-        //}
-        //while (coordinate[0] <= matrix.size[0]
-        //    && !(currentPointValues[0] <= currentPointValues[1]
-        //    && currentPointValues[1] > currentPointValues[2])) {
-
-        //    currentPointValues.shift();
-        //    currentPointValues.push(matrix.getFor(coordinate));
-        //    coordinate[0]++;
-        //}
-        //if (coordinate[0] <= matrix.size[0])
-        //    return { value: currentPointValues[1], position: coordinate[0] - 2 };
-        //else
-        //    return null;
     }
 }

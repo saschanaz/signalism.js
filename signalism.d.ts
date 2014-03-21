@@ -7,9 +7,11 @@ interface IntermediateWave {
 }
 declare class WaveDetector {
     public ondetect: (wave: Wave) => any;
-    private buffer;
-    private lastIntermediateWave;
+    private signalBuffer;
+    private waveBuffer;
+    private lastBufferedWave;
     private lastThree(index);
     private exportIntermediateWave();
+    private saveWave(wave);
     public readSignal(signal: number): void;
 }
