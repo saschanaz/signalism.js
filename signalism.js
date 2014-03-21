@@ -21,7 +21,7 @@ var WaveDetector = (function () {
             return;
         }
 
-        if (this.lastThree(0) <= this.lastThree(1) && this.lastThree(1) > this.lastThree(2)) {
+        if (this.lastThree(0) <= this.lastThree(1) && this.lastThree(1) > this.lastThree(2) && this.lastThree(1) > 0) {
             var newIntermediateWave = this.exportIntermediateWave();
             if (this.ondetect && this.lastIntermediateWave) {
                 window.setImmediate(this.ondetect, {
