@@ -23,8 +23,8 @@ var WaveDetector = (function () {
 
         if (this.lastThree(0) <= this.lastThree(1) && this.lastThree(1) > this.lastThree(2)) {
             var newIntermediateWave = this.exportIntermediateWave();
-            if (this.lastIntermediateWave) {
-                this.ondetect({
+            if (this.ondetect && this.lastIntermediateWave) {
+                window.setImmediate(this.ondetect, {
                     firstBottom: this.lastIntermediateWave.firstBottom,
                     peak: this.lastIntermediateWave.peak,
                     secondBottom: newIntermediateWave.firstBottom
