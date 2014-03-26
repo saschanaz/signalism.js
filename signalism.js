@@ -25,6 +25,8 @@ var WaveDetector = (function () {
         if (wave.firstBottom > 0) {
             if (this.lastBufferedWave.peak < wave.peak) {
                 this.lastBufferedWave.peak = wave.peak;
+                if (this.indexed)
+                    this.lastBufferedWave.peakIndex = wave.peakIndex;
             }
         } else
             this.waveBuffer.push(wave);
