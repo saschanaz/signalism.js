@@ -12,6 +12,7 @@ declare class WaveDetector {
     private indexed;
     public ondetect: (wave: Wave) => any;
     private signalBuffer;
+    private currentBufferIndex;
     private waveBuffer;
     private lastBufferedWave;
     /**
@@ -24,9 +25,14 @@ declare class WaveDetector {
     */
     constructor(indexed?: boolean);
     /**
-    * Export intermediate wave.
+    * Export intermediate wave data from signalBuffer
     */
     private exportIntermediateWave();
+    /**
+    * Detect bottom value and, optionally, position from the given signal array.
+    * @param signals The signal array
+    */
+    private getWaveFirstBottom(signals);
     private lastThreeSignals(index);
     /**
     * Read signal.

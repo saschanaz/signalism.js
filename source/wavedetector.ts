@@ -14,6 +14,7 @@ interface IntermediateWave {
 class WaveDetector {
     ondetect: (wave: Wave) => any;
     private signalBuffer: number[] = [];
+    private currentBufferIndex = 0;
     private waveBuffer: IntermediateWave[] = [];
 
     private get lastBufferedWave() {
@@ -42,10 +43,11 @@ class WaveDetector {
 
 
     /** 
-     * Export intermediate wave.
+     * Export intermediate wave data from signalBuffer
      */
     private exportIntermediateWave(): IntermediateWave {
         var signals = this.signalBuffer.splice(0, this.signalBuffer.length - 1);
+        this.currentBufferIndex += signals.length;
 
         return {
             firstBottom: Math.min.apply(null, signals),
@@ -53,6 +55,35 @@ class WaveDetector {
         };
     }
 
+
+    /** 
+     * Detect bottom value and, optionally, position from the given signal array.
+     * @param signals The signal array
+     */
+    private getWaveFirstBottom(signals: number[]): IntermediateWave {
+        if (!this.indexed) {
+            return {
+                firstBottom: Math.min.apply(null, signals),
+                peak: null
+            }
+        }
+        else {
+            var minimum = signals[0];
+            var minimumPosition = 0;
+            for (var i = 1; i < signals.length; i++) {
+                if (signals[i] <= minimum) {
+                    minimum = signals[i];
+                    minimumPosition = i;
+                }
+            }
+            return {
+                firstBottom: minimum,
+                firstBottomIndex: this.currentBufferIndex + minimumPosition,
+                peak: null,
+                peakIndex: null
+            }
+        }
+    }
 
     private lastThreeSignals(index: number) {
         return this.signalBuffer[this.signalBuffer.length - 3 + index];
@@ -74,12 +105,9 @@ class WaveDetector {
             this.bufferWave(this.exportIntermediateWave());
 
             if (this.ondetect && this.waveBuffer.length > 3) {
-                var wave = this.waveBuffer.shift();
-                window.setImmediate(this.ondetect, {
-                    firstBottom: wave.firstBottom,
-                    peak: wave.peak,
-                    secondBottom: this.waveBuffer[0].firstBottom
-                });
+                var wave = <Wave>this.waveBuffer.shift();
+                wave.secondBottom = this.waveBuffer[0].firstBottom;
+                window.setImmediate(this.ondetect, wave);
             }
         }
     }
