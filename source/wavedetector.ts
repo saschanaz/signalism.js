@@ -49,10 +49,12 @@ class WaveDetector {
         var signals = this.signalBuffer.splice(0, this.signalBuffer.length - 1);
         this.currentBufferIndex += signals.length;
 
-        return {
-            firstBottom: Math.min.apply(null, signals),
-            peak: signals[signals.length - 1]
-        };
+        var waveData = this.getWaveFirstBottom(signals);
+        waveData.peak = signals[signals.length - 1];
+        if (this.indexed)
+            waveData.peakIndex = this.currentBufferIndex + signals.length - 1;
+
+        return waveData;
     }
 
 
@@ -107,6 +109,8 @@ class WaveDetector {
             if (this.ondetect && this.waveBuffer.length > 3) {
                 var wave = <Wave>this.waveBuffer.shift();
                 wave.secondBottom = this.waveBuffer[0].firstBottom;
+                if (this.indexed)
+                    wave.secondBottomIndex = this.waveBuffer[0].firstBottomIndex;
                 window.setImmediate(this.ondetect, wave);
             }
         }
