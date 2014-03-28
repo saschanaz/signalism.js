@@ -37,13 +37,13 @@ var WaveDetector = (function () {
     */
     WaveDetector.prototype.exportIntermediateWave = function () {
         var signals = this.signalBuffer.splice(0, this.signalBuffer.length - 1);
-        this.currentBufferIndex += signals.length;
 
         var waveData = this.getWaveFirstBottom(signals);
         waveData.peak = signals[signals.length - 1];
         if (this.indexed)
             waveData.peakIndex = this.currentBufferIndex + signals.length - 1;
 
+        this.currentBufferIndex += signals.length;
         return waveData;
     };
 
