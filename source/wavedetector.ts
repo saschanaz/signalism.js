@@ -40,11 +40,11 @@ class WaveDetector {
     /**
      * @param indexed Signal index is needed or not
      */
-    constructor(private indexed?: boolean) {
+    constructor(public indexed?: boolean) {
     }
 
 
-    /** 
+    /**
      * Export intermediate wave data from signalBuffer
      */
     private exportIntermediateWave(): IntermediateWave {
@@ -60,7 +60,7 @@ class WaveDetector {
     }
 
 
-    /** 
+    /**
      * Detect bottom value and, optionally, position from the given signal array.
      * @param signals The signal array
      */

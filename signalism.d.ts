@@ -9,7 +9,7 @@ interface IntermediateWave {
     peakIndex?: number;
 }
 declare class WaveDetector {
-    private indexed;
+    public indexed: boolean;
     public ondetect: (wave: Wave) => any;
     private signalBuffer;
     private currentBufferIndex;
