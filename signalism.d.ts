@@ -17,9 +17,11 @@ declare class WaveDetector {
     private signalBuffer;
     private currentBufferIndex;
     private waveBuffer;
+    private minimumSignalValue;
+    private minimumSignalPosition;
     public indexed: boolean;
-    public detectionType: string;
     private lastBufferedWave;
+    private bufferSignal(signal);
     /**
     * Save a wave to waveBuffer.
     * @param wave The exported intermediate wave data

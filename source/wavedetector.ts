@@ -15,17 +15,94 @@ interface WaveDetectorOptions {
     detectionType?: string;
 }
 
+class SignalBuffer {
+    public indexed = false;
+
+    private currentBufferIndex = 0;
+    onpeakdetect: (wave: IntermediateWave) => any;
+    private buffer: number[] = [];
+    private minimumSignalValue = Infinity;
+    private minimumSignalPosition = -1;
+
+    bufferSignal(signal: number) {
+        this.buffer.push(signal);
+        this.checkMinimum();
+        this.detectPeak();
+    }
+    private checkMinimum() {
+        if (this.buffer.length > 1) {
+            var lastTargetSignal = this.buffer[this.buffer.length - 2];
+            if (lastTargetSignal > this.minimumSignalValue) {
+                this.minimumSignalValue = lastTargetSignal;
+                if (this.indexed)
+                    this.minimumSignalPosition = this.buffer.length - 2;
+            }
+        }
+    }
+    private exportIntermediateWave() {
+        var signals = this.buffer.splice(0, this.buffer.length - 1);
+
+        var waveData: IntermediateWave = {
+            firstBottom: this.minimumSignalValue,
+            peak: signals[signals.length - 1]
+        };
+
+        
+        waveData.peak = signals[signals.length - 1];
+        if (this.indexed) {
+            waveData.firstBottomIndex = this.minimumSignalPosition;
+            waveData.peakIndex = this.currentBufferIndex + signals.length - 1;
+        }
+
+        this.currentBufferIndex += signals.length;
+        return waveData;
+    }
+    private lastThreeSignals(index: number) {
+        return this.buffer[this.buffer.length - 3 + index];
+    }
+    private detectPeak() {
+        if (this.buffer.length < 3) {
+            return;
+        }
+
+        if (this.lastThreeSignals(0) <= this.lastThreeSignals(1)
+            && this.lastThreeSignals(1) > this.lastThreeSignals(2)
+            && this.lastThreeSignals(1) > 0) {
+            this.onpeakdetect(this.exportIntermediateWave());
+        }
+    }
+}
+
 class WaveDetector {
     ondetect: (wave: Wave) => any;
     private signalBuffer: number[] = [];
     private currentBufferIndex = 0;
     private waveBuffer: IntermediateWave[] = [];
+    private minimumSignalValue = Infinity;
+    private minimumSignalPosition = -1;
 
-    public indexed = false;
-    public detectionType = "peakbottom";
+    indexed = false;
+    //private _detectionType = "peakbottom";
+    //get detectionType() {
+    //    return this._detectionType;
+    //}
+    //set detectionType(type: string) {
+    //    switch (type) {
+    //        case "peakbottom":
+    //        case "peakonly":
+    //            this._detectionType = type;
+    //        default:
+    //            throw new Error("Detection type is invalid.");
+    //    }
+    //}
 
     private get lastBufferedWave() {
         return this.waveBuffer[this.waveBuffer.length - 1];
+    }
+
+    private bufferSignal(signal: number) {
+        this.signalBuffer.push(signal);
+        if (this.signalBuffer.length > 1 && this.signalBuffer[this.signalBuffer.length - 2] == 
     }
 
     /**
@@ -51,14 +128,8 @@ class WaveDetector {
         if (options) {
             if (options.indexed)
                 this.indexed = options.indexed;
-            if (options.detectionType) {
-                switch (options.detectionType) {
-                    case "peakbottom":
-                        this.detectionType = "peakbottom";
-                    case "peakonly":
-                        this.detectionType = "peakonly";
-                }
-            }
+            //if (options.detectionType)
+            //    this.detectionType = options.detectionType;
         }
     }
 
@@ -117,7 +188,7 @@ class WaveDetector {
      * @param signal The single raw signal value from external signal reader
      */
     readSignal(signal: number) {
-        this.signalBuffer.push(signal);
+        this.bufferSignal(signal);
         if (this.signalBuffer.length < 3) {
             return;
         }

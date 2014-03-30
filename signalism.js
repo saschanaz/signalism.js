@@ -7,28 +7,40 @@ var WaveDetector = (function () {
         this.signalBuffer = [];
         this.currentBufferIndex = 0;
         this.waveBuffer = [];
+        this.minimumSignalValue = Infinity;
+        this.minimumSignalPosition = -1;
         this.indexed = false;
-        this.detectionType = "peakbottom";
         if (options) {
             if (options.indexed)
                 this.indexed = options.indexed;
-            if (options.detectionType) {
-                switch (options.detectionType) {
-                    case "peakbottom":
-                        this.detectionType = "peakbottom";
-                    case "peakonly":
-                        this.detectionType = "peakonly";
-                }
-            }
+            //if (options.detectionType)
+            //    this.detectionType = options.detectionType;
         }
     }
     Object.defineProperty(WaveDetector.prototype, "lastBufferedWave", {
+        //private _detectionType = "peakbottom";
+        //get detectionType() {
+        //    return this._detectionType;
+        //}
+        //set detectionType(type: string) {
+        //    switch (type) {
+        //        case "peakbottom":
+        //        case "peakonly":
+        //            this._detectionType = type;
+        //        default:
+        //            throw new Error("Detection type is invalid.");
+        //    }
+        //}
         get: function () {
             return this.waveBuffer[this.waveBuffer.length - 1];
         },
         enumerable: true,
         configurable: true
     });
+
+    WaveDetector.prototype.bufferSignal = function (signal) {
+        this.signalBuffer.push(signal);
+    };
 
     /**
     * Save a wave to waveBuffer.
@@ -97,7 +109,7 @@ var WaveDetector = (function () {
     * @param signal The single raw signal value from external signal reader
     */
     WaveDetector.prototype.readSignal = function (signal) {
-        this.signalBuffer.push(signal);
+        this.bufferSignal(signal);
         if (this.signalBuffer.length < 3) {
             return;
         }
