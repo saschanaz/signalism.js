@@ -8,12 +8,17 @@ interface IntermediateWave {
     peak: number;
     peakIndex?: number;
 }
+interface WaveDetectorOptions {
+    indexed?: boolean;
+    detectionType?: string;
+}
 declare class WaveDetector {
-    public indexed: boolean;
     public ondetect: (wave: Wave) => any;
     private signalBuffer;
     private currentBufferIndex;
     private waveBuffer;
+    public indexed: boolean;
+    public detectionType: string;
     private lastBufferedWave;
     /**
     * Save a wave to waveBuffer.
@@ -23,7 +28,7 @@ declare class WaveDetector {
     /**
     * @param indexed Signal index is needed or not
     */
-    constructor(indexed?: boolean);
+    constructor(options?: WaveDetectorOptions);
     /**
     * Export intermediate wave data from signalBuffer
     */

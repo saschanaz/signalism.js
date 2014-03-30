@@ -10,12 +10,19 @@ interface IntermediateWave {
     peak: number;
     peakIndex?: number;
 }
+interface WaveDetectorOptions {
+    indexed?: boolean;
+    detectionType?: string;
+}
 
 class WaveDetector {
     ondetect: (wave: Wave) => any;
     private signalBuffer: number[] = [];
     private currentBufferIndex = 0;
     private waveBuffer: IntermediateWave[] = [];
+
+    public indexed = false;
+    public detectionType = "peakbottom";
 
     private get lastBufferedWave() {
         return this.waveBuffer[this.waveBuffer.length - 1];
@@ -40,7 +47,19 @@ class WaveDetector {
     /**
      * @param indexed Signal index is needed or not
      */
-    constructor(public indexed?: boolean) {
+    constructor(options?: WaveDetectorOptions) {
+        if (options) {
+            if (options.indexed)
+                this.indexed = options.indexed;
+            if (options.detectionType) {
+                switch (options.detectionType) {
+                    case "peakbottom":
+                        this.detectionType = "peakbottom";
+                    case "peakonly":
+                        this.detectionType = "peakonly";
+                }
+            }
+        }
     }
 
 

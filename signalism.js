@@ -3,11 +3,24 @@ var WaveDetector = (function () {
     /**
     * @param indexed Signal index is needed or not
     */
-    function WaveDetector(indexed) {
-        this.indexed = indexed;
+    function WaveDetector(options) {
         this.signalBuffer = [];
         this.currentBufferIndex = 0;
         this.waveBuffer = [];
+        this.indexed = false;
+        this.detectionType = "peakbottom";
+        if (options) {
+            if (options.indexed)
+                this.indexed = options.indexed;
+            if (options.detectionType) {
+                switch (options.detectionType) {
+                    case "peakbottom":
+                        this.detectionType = "peakbottom";
+                    case "peakonly":
+                        this.detectionType = "peakonly";
+                }
+            }
+        }
     }
     Object.defineProperty(WaveDetector.prototype, "lastBufferedWave", {
         get: function () {
