@@ -12,16 +12,32 @@ interface WaveDetectorOptions {
     indexed?: boolean;
     detectionType?: string;
 }
+declare class SignalBuffer {
+    public indexed: boolean;
+    private currentBufferIndex;
+    public onpeakdetect: (wave: IntermediateWave) => any;
+    private buffer;
+    private minimumSignalValue;
+    private minimumSignalPosition;
+    /**
+    * Buffer signal.
+    * @param signal The single raw signal value from external signal reader
+    */
+    public bufferSignal(signal: number): void;
+    private checkMinimum();
+    /**
+    * Export intermediate wave data from signalBuffer
+    */
+    private exportIntermediateWave();
+    private lastThreeSignals(index);
+    private detectPeak();
+}
 declare class WaveDetector {
     public ondetect: (wave: Wave) => any;
     private signalBuffer;
-    private currentBufferIndex;
     private waveBuffer;
-    private minimumSignalValue;
-    private minimumSignalPosition;
     public indexed: boolean;
     private lastBufferedWave;
-    private bufferSignal(signal);
     /**
     * Save a wave to waveBuffer.
     * @param wave The exported intermediate wave data
@@ -32,18 +48,9 @@ declare class WaveDetector {
     */
     constructor(options?: WaveDetectorOptions);
     /**
-    * Export intermediate wave data from signalBuffer
-    */
-    private exportIntermediateWave();
-    /**
-    * Detect bottom value and, optionally, position from the given signal array.
-    * @param signals The signal array
-    */
-    private getWaveFirstBottom(signals);
-    private lastThreeSignals(index);
-    /**
     * Read signal.
     * @param signal The single raw signal value from external signal reader
     */
     public readSignal(signal: number): void;
+    public processWave(wave: IntermediateWave): void;
 }
