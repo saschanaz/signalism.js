@@ -19,7 +19,7 @@ var SignalBuffer = (function () {
     SignalBuffer.prototype.checkMinimum = function () {
         if (this.buffer.length > 1) {
             var lastTargetSignal = this.buffer[this.buffer.length - 2];
-            if (lastTargetSignal > this.minimumSignalValue) {
+            if (lastTargetSignal < this.minimumSignalValue) {
                 this.minimumSignalValue = lastTargetSignal;
                 if (this.indexed)
                     this.minimumSignalPosition = this.buffer.length - 2;
@@ -67,6 +67,7 @@ var WaveDetector = (function () {
     * @param indexed Signal index is needed or not
     */
     function WaveDetector(options) {
+        var _this = this;
         this.signalBuffer = new SignalBuffer();
         this.waveBuffer = [];
         this.indexed = false;
@@ -74,7 +75,9 @@ var WaveDetector = (function () {
             if (options.indexed)
                 this.signalBuffer.indexed = options.indexed;
         }
-        this.signalBuffer.onpeakdetect = this.processWave;
+        this.signalBuffer.onpeakdetect = function (wave) {
+            _this.processWave(wave);
+        };
     }
     Object.defineProperty(WaveDetector.prototype, "lastBufferedWave", {
         get: function () {

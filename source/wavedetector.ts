@@ -12,7 +12,6 @@ interface IntermediateWave {
 }
 interface WaveDetectorOptions {
     indexed?: boolean;
-    detectionType?: string;
 }
 
 class SignalBuffer {
@@ -36,7 +35,7 @@ class SignalBuffer {
     private checkMinimum() {
         if (this.buffer.length > 1) {
             var lastTargetSignal = this.buffer[this.buffer.length - 2];
-            if (lastTargetSignal > this.minimumSignalValue) {
+            if (lastTargetSignal < this.minimumSignalValue) {
                 this.minimumSignalValue = lastTargetSignal;
                 if (this.indexed)
                     this.minimumSignalPosition = this.buffer.length - 2;
@@ -115,7 +114,7 @@ class WaveDetector {
             if (options.indexed)
                 this.signalBuffer.indexed = options.indexed;
         }
-        this.signalBuffer.onpeakdetect = this.processWave;
+        this.signalBuffer.onpeakdetect = (wave: IntermediateWave) => { this.processWave(wave) };
     }
 
     /**

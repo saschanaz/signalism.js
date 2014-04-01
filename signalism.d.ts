@@ -10,7 +10,6 @@ interface IntermediateWave {
 }
 interface WaveDetectorOptions {
     indexed?: boolean;
-    detectionType?: string;
 }
 declare class SignalBuffer {
     public indexed: boolean;
